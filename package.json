@@ -35,7 +35,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AugmentedMagic/ilya"
+    "url": "https://github.com/cyburns/ilya"
   },
   "engines": {
     "node": ">=18"

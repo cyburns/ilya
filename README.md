@@ -1,4 +1,4 @@
-# mcp-tap
+# ilya
 
 See exactly what your MCP client sends and your server responds.
 
@@ -10,7 +10,7 @@ Cursor / Claude Desktop / Claude Code
     │ ←────────── spawns (thinks this IS the MCP server)
     ▼
 ┌───────────┐
-│  mcp-tap  │  ←─ logs every message
+│  ilya  │  ←─ logs every message
 └───────────┘
     │
     │ ←────────── spawns the real server
@@ -24,34 +24,34 @@ Cursor / Claude Desktop / Claude Code
 
 When Cursor or Claude Desktop spawns an MCP server, it owns the child process. All stdio communication is invisible. There's no terminal, no logs, no way to see what the AI is asking or what the server responds with.
 
-`mcp-tap` fixes that. Zero dependencies, zero config. Just prefix your command.
+`ilya` fixes that. Zero dependencies, zero config. Just prefix your command.
 
 <!-- TODO: terminal recording gif -->
 
 ## Install
 
 ```bash
-npm install -g mcp-tap
+npm install -g ilya
 ```
 
 Or use directly with npx:
 
 ```bash
-npx mcp-tap node ./my-server.js
+npx ilya node ./my-server.js
 ```
 
 ## Usage
 
-Prefix your MCP server command with `mcp-tap`:
+Prefix your MCP server command with `ilya`:
 
 ```bash
-mcp-tap node ./my-server.js
-mcp-tap python ./server.py
-mcp-tap npx ts-node ./server.ts
-mcp-tap ./my-binary --flag
+ilya node ./my-server.js
+ilya python ./server.py
+ilya npx ts-node ./server.ts
+ilya ./my-binary --flag
 ```
 
-Logs are written to `~/.mcp-tap/logs/<server>-<pid>.log` by default. The log path is printed to stderr on startup.
+Logs are written to `~/.ilya/logs/<server>-<pid>.log` by default. The log path is printed to stderr on startup.
 
 ### Flags
 
@@ -64,7 +64,7 @@ Logs are written to `~/.mcp-tap/logs/<server>-<pid>.log` by default. The log pat
 
 ### Integration with MCP clients
 
-In your MCP client config, just wrap the command with `npx mcp-tap`:
+In your MCP client config, just wrap the command with `npx ilya`:
 
 **Cursor / Claude Desktop (`mcp.json` or settings):**
 
@@ -73,7 +73,7 @@ In your MCP client config, just wrap the command with `npx mcp-tap`:
   "mcpServers": {
     "my-server": {
       "command": "npx",
-      "args": ["mcp-tap", "node", "./my-server.js"]
+      "args": ["ilya", "node", "./my-server.js"]
     }
   }
 }
@@ -86,7 +86,7 @@ In your MCP client config, just wrap the command with `npx mcp-tap`:
   "mcpServers": {
     "my-server": {
       "command": "npx",
-      "args": ["mcp-tap", "node", "./my-server.js"]
+      "args": ["ilya", "node", "./my-server.js"]
     }
   }
 }
@@ -95,7 +95,7 @@ In your MCP client config, just wrap the command with `npx mcp-tap`:
 Then tail the log file in a separate terminal:
 
 ```bash
-tail -f ~/.mcp-tap/logs/node-*.log
+tail -f ~/.ilya/logs/node-*.log
 ```
 
 Or use `--port` to stream logs over HTTP:
@@ -105,7 +105,7 @@ Or use `--port` to stream logs over HTTP:
   "mcpServers": {
     "my-server": {
       "command": "npx",
-      "args": ["mcp-tap", "--port", "3456", "node", "./my-server.js"]
+      "args": ["ilya", "--port", "3456", "node", "./my-server.js"]
     }
   }
 }
@@ -150,8 +150,8 @@ Server stderr is forwarded with a prefix:
 
 ## How it works
 
-1. Your MCP client spawns `mcp-tap` instead of the real server
-2. `mcp-tap` spawns the real server as a child process
+1. Your MCP client spawns `ilya` instead of the real server
+2. `ilya` spawns the real server as a child process
 3. Every stdin line from the client is logged and forwarded to the server
 4. Every stdout line from the server is logged and forwarded to the client
 5. Messages are never modified, delayed, or buffered — fully transparent
@@ -159,7 +159,7 @@ Server stderr is forwarded with a prefix:
 
 ## Works with everything
 
-Any MCP server in any language. If it speaks JSON-RPC over stdio, `mcp-tap` can log it.
+Any MCP server in any language. If it speaks JSON-RPC over stdio, `ilya` can log it.
 
 ## License
 

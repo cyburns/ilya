@@ -23,20 +23,20 @@ export const startHttpServer = (
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
     });
-    res.write(`[mcp-tap] streaming logs for: ${serverDescription}\n\n`);
+    res.write(`[ilya] streaming logs for: ${serverDescription}\n\n`);
     logger.addHttpClient(res);
     req.on("close", () => logger.removeHttpClient(res));
   });
 
   server.listen(port, "127.0.0.1", () => {
     process.stderr.write(
-      `[mcp-tap] log server listening on http://127.0.0.1:${port}\n`,
+      `[ilya] log server listening on http://127.0.0.1:${port}\n`,
     );
   });
 
   server.on("error", (err: Error) => {
     process.stderr.write(
-      `[mcp-tap] failed to start HTTP server: ${err.message}\n`,
+      `[ilya] failed to start HTTP server: ${err.message}\n`,
     );
   });
 };

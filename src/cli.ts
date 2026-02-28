@@ -15,10 +15,10 @@ interface ParsedArgs {
  * Print the usage information for the CLI.
  */
 const printUsage = (): void => {
-  process.stderr.write(`mcp-tap — transparent MCP stdio proxy with logging
+  process.stderr.write(`ilya — transparent MCP stdio proxy with logging
 
 Usage:
-  mcp-tap [options] <command> [args...]
+  ilya [options] <command> [args...]
 
 Options:
   --log, -l <path>    Write logs to a specific file
@@ -27,9 +27,9 @@ Options:
   --version, -v       Show version
 
 Examples:
-  mcp-tap node ./my-server.js
-  mcp-tap --log /tmp/tap.log python server.py
-  mcp-tap --port 3456 npx ts-node ./server.ts
+  ilya node ./my-server.js
+  ilya --log /tmp/tap.log python server.py
+  ilya --port 3456 npx ts-node ./server.ts
 `);
 };
 
@@ -56,7 +56,7 @@ const parseArgs = (argv: string[]): ParsedArgs => {
       printUsage();
       process.exit(0);
     } else if (args[i] === "--version" || args[i] === "-v") {
-      process.stderr.write("mcp-tap 0.1.0\n");
+      process.stderr.write("ilya 0.1.0\n");
       process.exit(0);
     } else {
       serverCmd = args[i];

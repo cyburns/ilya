@@ -26,7 +26,7 @@ export const startProxy = (opts: ProxyOptions): void => {
   });
 
   child.on("error", (err: Error) => {
-    const msg = `[mcp-tap] failed to start server: ${err.message}`;
+    const msg = `[ilya] failed to start server: ${err.message}`;
     logger.write(`${c.RED}${msg}${c.RESET}`, msg);
     process.exit(1);
   });
@@ -72,8 +72,8 @@ export const startProxy = (opts: ProxyOptions): void => {
   child.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
     const exitCode = code ?? (signal ? 1 : 0);
     const msg = signal
-      ? `[mcp-tap] server exited with signal ${signal}`
-      : `[mcp-tap] server exited with code ${exitCode}`;
+      ? `[ilya] server exited with signal ${signal}`
+      : `[ilya] server exited with code ${exitCode}`;
     logger.write(`${c.DIM}${msg}${c.RESET}`, msg);
     logger.close();
     process.exit(exitCode);
@@ -85,7 +85,7 @@ export const startProxy = (opts: ProxyOptions): void => {
    * @param sig The signal that triggered the shutdown
    */
   const shutdown = (sig: string): void => {
-    const msg = `[mcp-tap] received ${sig}, shutting down`;
+    const msg = `[ilya] received ${sig}, shutting down`;
     logger.write(`${c.DIM}${msg}${c.RESET}`, msg);
     try {
       child.kill(sig as NodeJS.Signals);
@@ -109,7 +109,7 @@ export const startProxy = (opts: ProxyOptions): void => {
 
   process.stdout.on("error", (err: NodeJS.ErrnoException) => {
     if (err.code === "EPIPE") {
-      const msg = "[mcp-tap] client disconnected (EPIPE)";
+      const msg = "[ilya] client disconnected (EPIPE)";
       logger.write(`${c.DIM}${msg}${c.RESET}`, msg);
       try {
         child.kill("SIGTERM");

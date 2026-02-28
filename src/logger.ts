@@ -20,7 +20,7 @@ export class Logger {
       this.logFilePath = opts.logFilePath;
     } else {
       const serverName = basename(opts.serverCmd).replace(/\.[^.]+$/, "");
-      const logDir = join(homedir(), ".mcp-tap", "logs");
+      const logDir = join(homedir(), ".ilya", "logs");
       try {
         mkdirSync(logDir, { recursive: true });
       } catch {
@@ -30,7 +30,7 @@ export class Logger {
     }
 
     this.fileStream = createWriteStream(this.logFilePath, { flags: "a" });
-    process.stderr.write(`[mcp-tap] logging to ${this.logFilePath}\n`);
+    process.stderr.write(`[ilya] logging to ${this.logFilePath}\n`);
   }
 
   write(coloredLine: string, plainLine: string): void {

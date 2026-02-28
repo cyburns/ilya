@@ -7,17 +7,17 @@ A transparent stdio proxy that sits between any MCP client (Cursor, Claude Deskt
 ```
 Cursor / Claude Desktop / Claude Code
     │
-    │  spawns (thinks this IS the MCP server)
+    │ ←────────── spawns (thinks this IS the MCP server)
     ▼
-┌──────────┐
-│  mcp-tap  │  ← logs every message
-└──────────┘
+┌───────────┐
+│  mcp-tap  │  ←─ logs every message
+└───────────┘
     │
-    │  spawns the real server
+    │ ←────────── spawns the real server
     ▼
-┌──────────────────┐
+┌────────────────────┐
 │  actual MCP server │
-└──────────────────┘
+└────────────────────┘
 ```
 
 ## Why

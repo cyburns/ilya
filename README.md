@@ -1,0 +1,166 @@
+# mcp-tap
+
+See exactly what your MCP client sends and your server responds.
+
+A transparent stdio proxy that sits between any MCP client (Cursor, Claude Desktop, Claude Code) and any MCP server, logging every JSON-RPC message so you can actually see what's happening.
+
+```
+Cursor / Claude Desktop / Claude Code
+    │
+    │  spawns (thinks this IS the MCP server)
+    ▼
+┌──────────┐
+│  mcp-tap  │  ← logs every message
+└──────────┘
+    │
+    │  spawns the real server
+    ▼
+┌──────────────────┐
+│  actual MCP server │
+└──────────────────┘
+```
+
+## Why
+
+When Cursor or Claude Desktop spawns an MCP server, it owns the child process. All stdio communication is invisible. There's no terminal, no logs, no way to see what the AI is asking or what the server responds with.
+
+`mcp-tap` fixes that. Zero dependencies, zero config. Just prefix your command.
+
+<!-- TODO: terminal recording gif -->
+
+## Install
+
+```bash
+npm install -g mcp-tap
+```
+
+Or use directly with npx:
+
+```bash
+npx mcp-tap node ./my-server.js
+```
+
+## Usage
+
+Prefix your MCP server command with `mcp-tap`:
+
+```bash
+mcp-tap node ./my-server.js
+mcp-tap python ./server.py
+mcp-tap npx ts-node ./server.ts
+mcp-tap ./my-binary --flag
+```
+
+Logs are written to `~/.mcp-tap/logs/<server>-<pid>.log` by default. The log path is printed to stderr on startup.
+
+### Flags
+
+```
+--log, -l <path>    Write logs to a specific file
+--port, -p <port>   Start an HTTP server to stream logs in real time
+--help, -h          Show help
+--version, -v       Show version
+```
+
+### Integration with MCP clients
+
+In your MCP client config, just wrap the command with `npx mcp-tap`:
+
+**Cursor / Claude Desktop (`mcp.json` or settings):**
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": ["mcp-tap", "node", "./my-server.js"]
+    }
+  }
+}
+```
+
+**Claude Code (`.mcp.json`):**
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": ["mcp-tap", "node", "./my-server.js"]
+    }
+  }
+}
+```
+
+Then tail the log file in a separate terminal:
+
+```bash
+tail -f ~/.mcp-tap/logs/node-*.log
+```
+
+Or use `--port` to stream logs over HTTP:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": ["mcp-tap", "--port", "3456", "node", "./my-server.js"]
+    }
+  }
+}
+```
+
+```bash
+curl http://localhost:3456
+```
+
+## Example output
+
+```
+12:34:56.100 → CLIENT  notification  notifications/initialized
+12:34:56.200 → CLIENT  request  initialize  #1
+    {"protocolVersion":"2024-11-05","capabilities":{}}
+12:34:56.250 ← SERVER  response  initialize  #1  50ms
+    my-server v1.0.0  capabilities: tools, resources
+12:34:56.300 → CLIENT  request  tools/list  #2
+12:34:56.310 ← SERVER  response  tools/list  #2  10ms
+    (5 tools: get_overview, analyze_error, search_logs, get_config, restart)
+12:34:56.500 → CLIENT  request  tools/call  get_overview  #3
+    {
+      "query": "why is my app slow"
+    }
+12:34:57.100 ← SERVER  response  tools/call  #3  600ms
+    [text] Found 3 sessions with performance issues...
+```
+
+Errors are clearly highlighted:
+
+```
+12:34:57.456 ← SERVER  ERROR  (tools/call #3)  12ms
+    [-32601] Method not found
+```
+
+Server stderr is forwarded with a prefix:
+
+```
+[server stderr] Listening on stdio
+[server stderr] Connected to database
+```
+
+## How it works
+
+1. Your MCP client spawns `mcp-tap` instead of the real server
+2. `mcp-tap` spawns the real server as a child process
+3. Every stdin line from the client is logged and forwarded to the server
+4. Every stdout line from the server is logged and forwarded to the client
+5. Messages are never modified, delayed, or buffered — fully transparent
+6. Logs go to a file (and optionally stderr/HTTP) so they never interfere with the stdio protocol
+
+## Works with everything
+
+Any MCP server in any language. If it speaks JSON-RPC over stdio, `mcp-tap` can log it.
+
+## License
+
+MIT

@@ -1,0 +1,38 @@
+{
+  "name": "mcp-tap",
+  "version": "0.1.0",
+  "description": "See exactly what your MCP client sends and your server responds. Zero config, zero dependencies.",
+  "type": "module",
+  "bin": {
+    "mcp-tap": "./bin/mcp-tap.js"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "debug",
+    "inspector",
+    "devtools",
+    "stdio",
+    "proxy",
+    "logging"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AugmentedMagic/mcp-tap"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -3,6 +3,7 @@ import { Logger } from "./logger.js";
 import { startHttpServer } from "./http-server.js";
 import { startProxy } from "./proxy.js";
 import type { PendingRequest } from "./result-formatter.js";
+import { watch, parseWatchArgs } from "./watch.js";
 
 interface ParsedArgs {
   logFilePath: string | null;
@@ -18,18 +19,26 @@ const printUsage = (): void => {
   process.stderr.write(`ilya — transparent MCP stdio proxy with logging
 
 Usage:
-  ilya [options] <command> [args...]
+  ilya [options] <command> [args...]    Proxy mode
+  ilya watch [options]                  Stream logs with colors
 
-Options:
+Proxy options:
   --log, -l <path>    Write logs to a specific file
   --port, -p <port>   Start an HTTP server to stream logs
-  --help, -h          Show this help
+
+Watch options:
+  --dir <path>        Custom log directory
+  --file <path>       Watch a specific file
+  --no-color          Disable colors
+
+  --help, -h          Show help
   --version, -v       Show version
 
 Examples:
   ilya node ./my-server.js
   ilya --log /tmp/tap.log python server.py
   ilya --port 3456 npx ts-node ./server.ts
+  ilya watch
 `);
 };
 
@@ -72,6 +81,14 @@ const parseArgs = (argv: string[]): ParsedArgs => {
  * Run the CLI application.
  */
 export const run = (): void => {
+  const args = process.argv.slice(2);
+
+  if (args[0] === "watch") {
+    const watchOpts = parseWatchArgs(args.slice(1));
+    watch(watchOpts);
+    return;
+  }
+
   const { logFilePath, httpPort, serverCmd, serverArgs } = parseArgs(
     process.argv,
   );

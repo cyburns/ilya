@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createColors, PLAIN, methodColor } from "./colors.js";
+import { createColors, PLAIN, methodColor } from "../src/colors.js";
 
 describe("createColors", () => {
   it("returns ANSI codes when isTTY is true", () => {

@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { formatResult, type FormatterContext } from "./result-formatter.js";
-import { PLAIN } from "./colors.js";
+import {
+  formatResult,
+  type FormatterContext,
+} from "../src/result-formatter.js";
+import { PLAIN } from "../src/colors.js";
 
 function createMockCtx() {
   const written: Array<{ colored: string; plain: string }> = [];
@@ -10,7 +13,11 @@ function createMockCtx() {
     }),
   };
   return {
-    ctx: { logger, colors: PLAIN, plainColors: PLAIN } as unknown as FormatterContext,
+    ctx: {
+      logger,
+      colors: PLAIN,
+      plainColors: PLAIN,
+    } as unknown as FormatterContext,
     written,
     logger,
   };
@@ -29,9 +36,14 @@ describe("formatResult", () => {
 
   it("summarizes tools/list", () => {
     const { ctx, written } = createMockCtx();
-    formatResult("tools/list", {
-      tools: [{ name: "echo" }, { name: "add" }],
-    }, undefined, ctx);
+    formatResult(
+      "tools/list",
+      {
+        tools: [{ name: "echo" }, { name: "add" }],
+      },
+      undefined,
+      ctx,
+    );
     expect(written.length).toBe(1);
     expect(written[0].plain).toContain("2 tools");
     expect(written[0].plain).toContain("echo, add");
@@ -47,27 +59,42 @@ describe("formatResult", () => {
 
   it("summarizes resources/list", () => {
     const { ctx, written } = createMockCtx();
-    formatResult("resources/list", {
-      resources: [{ name: "readme", uri: "file:///readme" }],
-    }, undefined, ctx);
+    formatResult(
+      "resources/list",
+      {
+        resources: [{ name: "readme", uri: "file:///readme" }],
+      },
+      undefined,
+      ctx,
+    );
     expect(written[0].plain).toContain("1 resources");
     expect(written[0].plain).toContain("readme");
   });
 
   it("summarizes prompts/list", () => {
     const { ctx, written } = createMockCtx();
-    formatResult("prompts/list", {
-      prompts: [{ name: "greeting" }],
-    }, undefined, ctx);
+    formatResult(
+      "prompts/list",
+      {
+        prompts: [{ name: "greeting" }],
+      },
+      undefined,
+      ctx,
+    );
     expect(written[0].plain).toContain("1 prompts");
     expect(written[0].plain).toContain("greeting");
   });
 
   it("formats tools/call text content", () => {
     const { ctx, written } = createMockCtx();
-    formatResult("tools/call", {
-      content: [{ type: "text", text: "hello\nworld" }],
-    }, undefined, ctx);
+    formatResult(
+      "tools/call",
+      {
+        content: [{ type: "text", text: "hello\nworld" }],
+      },
+      undefined,
+      ctx,
+    );
     expect(written.length).toBe(2);
     expect(written[0].plain).toContain("[text] hello");
     expect(written[1].plain).toContain("[text] world");
@@ -75,29 +102,46 @@ describe("formatResult", () => {
 
   it("formats tools/call image content", () => {
     const { ctx, written } = createMockCtx();
-    formatResult("tools/call", {
-      content: [{ type: "image", mimeType: "image/png", data: "a".repeat(4096) }],
-    }, undefined, ctx);
+    formatResult(
+      "tools/call",
+      {
+        content: [
+          { type: "image", mimeType: "image/png", data: "a".repeat(4096) },
+        ],
+      },
+      undefined,
+      ctx,
+    );
     expect(written[0].plain).toContain("[image image/png]");
     expect(written[0].plain).toContain("KB");
   });
 
   it("shows isError flag", () => {
     const { ctx, written } = createMockCtx();
-    formatResult("tools/call", {
-      content: [{ type: "text", text: "fail" }],
-      isError: true,
-    }, undefined, ctx);
+    formatResult(
+      "tools/call",
+      {
+        content: [{ type: "text", text: "fail" }],
+        isError: true,
+      },
+      undefined,
+      ctx,
+    );
     const last = written[written.length - 1];
     expect(last.plain).toContain("isError: true");
   });
 
   it("formats initialize capabilities", () => {
     const { ctx, written } = createMockCtx();
-    formatResult("initialize", {
-      capabilities: { tools: {}, resources: {} },
-      serverInfo: { name: "test-server", version: "1.0" },
-    }, undefined, ctx);
+    formatResult(
+      "initialize",
+      {
+        capabilities: { tools: {}, resources: {} },
+        serverInfo: { name: "test-server", version: "1.0" },
+      },
+      undefined,
+      ctx,
+    );
     expect(written[0].plain).toContain("test-server v1.0");
     expect(written[0].plain).toContain("tools, resources");
   });

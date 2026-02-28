@@ -1,6 +1,6 @@
 {
   "name": "ilya",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "See exactly what your MCP client sends and your server responds. Zero config, zero dependencies.",
   "type": "module",
   "bin": {
@@ -14,7 +14,8 @@
     "build": "tsc",
     "test": "npx vitest run",
     "test:coverage": "npx vitest run --coverage",
-    "test:watch": "npx vitest"
+    "test:watch": "npx vitest",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^22",

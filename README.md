@@ -92,7 +92,13 @@ In your MCP client config, just wrap the command with `npx ilya`:
 }
 ```
 
-Then tail the log file in a separate terminal:
+Then stream logs in a separate terminal:
+
+```bash
+ilya watch
+```
+
+Or tail the log file directly:
 
 ```bash
 tail -f ~/.ilya/logs/node-*.log
@@ -146,6 +152,24 @@ Server stderr is forwarded with a prefix:
 ```
 [server stderr] Listening on stdio
 [server stderr] Connected to database
+```
+
+## Watching logs
+
+Stream live MCP traffic in your terminal with colors:
+
+```bash
+ilya watch
+```
+
+This auto-detects the latest log file in `~/.ilya/logs/` and streams it. When Claude Code restarts and creates a new log, `ilya watch` automatically switches to it.
+
+Options:
+
+```
+--dir <path>     Custom log directory (default: ~/.ilya/logs/)
+--file <path>    Watch a specific file
+--no-color       Disable colors
 ```
 
 ## How it works

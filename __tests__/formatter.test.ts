@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { formatMessage, type MessageContext } from "./formatter.js";
-import { PLAIN } from "./colors.js";
-import type { PendingRequest } from "./result-formatter.js";
+import { formatMessage, type MessageContext } from "../src/formatter.js";
+import { PLAIN } from "../src/colors.js";
+import type { PendingRequest } from "../src/result-formatter.js";
 
 function createMockCtx() {
   const written: Array<{ colored: string; plain: string }> = [];
@@ -23,7 +23,10 @@ function createMockCtx() {
 describe("formatMessage", () => {
   it("formats a notification (method, no id)", () => {
     const { ctx, written } = createMockCtx();
-    const json = JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" });
+    const json = JSON.stringify({
+      jsonrpc: "2.0",
+      method: "notifications/initialized",
+    });
     formatMessage(json, "client", ctx);
     expect(written[0].plain).toContain("CLIENT");
     expect(written[0].plain).toContain("notification");
@@ -32,7 +35,11 @@ describe("formatMessage", () => {
 
   it("formats a request (method + id)", () => {
     const { ctx, written, pendingRequests } = createMockCtx();
-    const json = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" });
+    const json = JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/list",
+    });
     formatMessage(json, "client", ctx);
     expect(written[0].plain).toContain("request");
     expect(written[0].plain).toContain("tools/list");
@@ -43,7 +50,9 @@ describe("formatMessage", () => {
   it("formats a tools/call request with tool name", () => {
     const { ctx, written } = createMockCtx();
     const json = JSON.stringify({
-      jsonrpc: "2.0", id: 5, method: "tools/call",
+      jsonrpc: "2.0",
+      id: 5,
+      method: "tools/call",
       params: { name: "echo", arguments: { msg: "hi" } },
     });
     formatMessage(json, "client", ctx);
@@ -55,9 +64,14 @@ describe("formatMessage", () => {
 
   it("formats a success response", () => {
     const { ctx, written, pendingRequests } = createMockCtx();
-    pendingRequests.set(1, { method: "tools/list", toolName: null, ts: Date.now() - 50 });
+    pendingRequests.set(1, {
+      method: "tools/list",
+      toolName: null,
+      ts: Date.now() - 50,
+    });
     const json = JSON.stringify({
-      jsonrpc: "2.0", id: 1,
+      jsonrpc: "2.0",
+      id: 1,
       result: { tools: [{ name: "echo" }] },
     });
     formatMessage(json, "server", ctx);
@@ -68,9 +82,14 @@ describe("formatMessage", () => {
 
   it("formats an error response", () => {
     const { ctx, written, pendingRequests } = createMockCtx();
-    pendingRequests.set(2, { method: "tools/call", toolName: "fail", ts: Date.now() });
+    pendingRequests.set(2, {
+      method: "tools/call",
+      toolName: "fail",
+      ts: Date.now(),
+    });
     const json = JSON.stringify({
-      jsonrpc: "2.0", id: 2,
+      jsonrpc: "2.0",
+      id: 2,
       error: { code: -32600, message: "Invalid request" },
     });
     formatMessage(json, "server", ctx);
@@ -88,7 +107,10 @@ describe("formatMessage", () => {
 
   it("uses correct direction labels", () => {
     const { ctx, written } = createMockCtx();
-    const json = JSON.stringify({ jsonrpc: "2.0", method: "notifications/test" });
+    const json = JSON.stringify({
+      jsonrpc: "2.0",
+      method: "notifications/test",
+    });
 
     formatMessage(json, "client", ctx);
     expect(written[0].plain).toContain("→");
@@ -102,7 +124,8 @@ describe("formatMessage", () => {
   it("shows notification params when present", () => {
     const { ctx, written } = createMockCtx();
     const json = JSON.stringify({
-      jsonrpc: "2.0", method: "notifications/progress",
+      jsonrpc: "2.0",
+      method: "notifications/progress",
       params: { token: "abc", progress: 50 },
     });
     formatMessage(json, "server", ctx);

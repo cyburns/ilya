@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { timestamp, truncate } from "./utils.js";
+import { timestamp, truncate } from "../src/utils.js";
 
 describe("timestamp", () => {
   it("returns HH:MM:SS.mmm format", () => {

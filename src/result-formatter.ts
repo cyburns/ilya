@@ -2,6 +2,134 @@ import type { Colors } from "./colors.js";
 import type { Logger } from "./logger.js";
 import { truncate } from "./utils.js";
 
+const NOISE_FIELDS = new Set(["id", "timestamp"]);
+
+/**
+ * Recursively truncate arrays to maxItems, appending a "... +N more" marker.
+ *
+ * @param obj The object to truncate
+ * @param maxItems The maximum number of items to keep `in arrays
+ * @returns The truncated object
+ */
+export const truncateArrays = (obj: unknown, maxItems: number = 3): unknown => {
+  if (Array.isArray(obj)) {
+    const truncated = obj
+      .slice(0, maxItems)
+      .map((item) => truncateArrays(item, maxItems));
+
+    if (obj.length > maxItems) {
+      truncated.push(`... +${obj.length - maxItems} more`);
+    }
+
+    return truncated;
+  }
+
+  if (obj !== null && typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      result[key] = truncateArrays(value, maxItems);
+    }
+
+    return result;
+  }
+
+  return obj;
+};
+
+/**
+ * Truncate string values longer than maxLen inside a parsed JSON structure.
+ *
+ * @param obj The object to truncate string values in
+ * @param maxLen The maximum length of string values
+ * @returns The object with truncated string values
+ */
+export const truncateStringValues = (
+  obj: unknown,
+  maxLen: number = 100,
+): unknown => {
+  if (typeof obj === "string") {
+    if (obj.length > maxLen) return obj.slice(0, maxLen - 3) + "...";
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => truncateStringValues(item, maxLen));
+  }
+
+  if (obj !== null && typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      result[key] = truncateStringValues(value, maxLen);
+    }
+
+    return result;
+  }
+
+  return obj;
+};
+
+/**
+ * Remove noisy fields (id, timestamp, empty graphql) from items inside arrays.
+ * Only strips from array elements, not top-level objects.
+ *
+ * @param obj The object to remove noise fields from
+ * @param insideArray Whether the current object is inside an array
+ * @returns The object with noise fields removed
+ */
+export const removeNoiseFields = (
+  obj: unknown,
+  insideArray: boolean = false,
+): unknown => {
+  if (Array.isArray(obj)) {
+    return obj.map((item) => removeNoiseFields(item, true));
+  }
+
+  if (obj !== null && typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      if (insideArray && NOISE_FIELDS.has(key)) continue;
+
+      if (
+        insideArray &&
+        key === "graphql" &&
+        value !== null &&
+        typeof value === "object" &&
+        Object.keys(value as object).length === 0
+      ) {
+        continue;
+      }
+      result[key] = removeNoiseFields(value, false);
+    }
+
+    return result;
+  }
+
+  return obj;
+};
+
+/**
+ * Try to parse text as JSON and pretty-print it with truncation.
+ * Returns null if the text is not valid JSON.
+ *
+ * @param text The text to parse as JSON
+ * @returns The pretty-printed JSON string or null if parsing fails
+ */
+export const tryFormatJson = (text: string): string | null => {
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed === null || typeof parsed !== "object") return null;
+    const truncated = truncateArrays(parsed);
+    const cleaned = removeNoiseFields(truncated);
+    const shortened = truncateStringValues(cleaned);
+    return JSON.stringify(shortened, null, 2);
+  } catch {
+    return null;
+  }
+};
+
 export interface PendingRequest {
   method: string;
   toolName: string | null;
@@ -81,12 +209,24 @@ export const formatResult = (
     const content = result.content as Array<Record<string, unknown>>;
     for (const block of content) {
       if (block.type === "text") {
-        const lines = (block.text as string).split("\n");
-        for (const line of lines) {
-          logger.write(
-            `    ${c.DIM}[text]${c.RESET} ${line}`,
-            `    [text] ${line}`,
-          );
+        const text = block.text as string;
+        const formatted = tryFormatJson(text);
+        if (formatted !== null) {
+          logger.write(`    ${c.DIM}[text]${c.RESET}`, `    [text]`);
+          for (const line of formatted.split("\n")) {
+            logger.write(
+              `    ${c.DIM}    ${line}${c.RESET}`,
+              `        ${line}`,
+            );
+          }
+        } else {
+          const lines = text.split("\n");
+          for (const line of lines) {
+            logger.write(
+              `    ${c.DIM}[text]${c.RESET} ${line}`,
+              `    [text] ${line}`,
+            );
+          }
         }
       } else if (block.type === "image") {
         const data = block.data as string | undefined;

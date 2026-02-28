@@ -2,7 +2,11 @@ import type { Colors } from "./colors.js";
 import { methodColor } from "./colors.js";
 import type { Logger } from "./logger.js";
 import type { PendingRequest } from "./result-formatter.js";
-import { formatResult } from "./result-formatter.js";
+import {
+  formatResult,
+  truncateArrays,
+  truncateStringValues,
+} from "./result-formatter.js";
 import { timestamp, truncate } from "./utils.js";
 
 export interface MessageContext {
@@ -73,7 +77,10 @@ export const formatMessage = (
       logger.write(colored, plain);
 
       if (method === "tools/call" && params?.arguments) {
-        const argStr = JSON.stringify(params.arguments, null, 2);
+        const truncated = truncateStringValues(
+          truncateArrays(params.arguments),
+        );
+        const argStr = JSON.stringify(truncated, null, 2);
         const lines = argStr.split("\n");
         for (const line of lines) {
           logger.write(`    ${c.DIM}${line}${c.RESET}`, `    ${line}`);
